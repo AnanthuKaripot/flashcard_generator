@@ -1,0 +1,55 @@
+{
+    "date": "2026-01-26",
+    "cards": [
+        {
+            "id": 96,
+            "image": "C:\\Users\\anant\\.n8n-files\\flashcards\\card_1_front.png",
+            "front_image": "C:\\Users\\anant\\.n8n-files\\flashcards\\card_1_front.png",
+            "back_image": "C:\\Users\\anant\\.n8n-files\\flashcards\\card_1_back.png",
+            "question": "What is the drug of choice for the prevention and treatment of seizures in a woman with severe preeclampsia?",
+            "answer": "Magnesium Sulfate",
+            "explanation": "Magnesium Sulfate is the gold standard for eclampsia prophylaxis and treatment. It acts as a membrane stabilizer and vasodilator. Calcium Gluconate is the antidote for toxicity.",
+            "subject": "Obstetrics & Gynae"
+        },
+        {
+            "id": 637,
+            "image": "C:\\Users\\anant\\.n8n-files\\flashcards\\card_2_front.png",
+            "front_image": "C:\\Users\\anant\\.n8n-files\\flashcards\\card_2_front.png",
+            "back_image": "C:\\Users\\anant\\.n8n-files\\flashcards\\card_2_back.png",
+            "question": "What is the 'Rule of 3' for Colic in infants?",
+            "answer": "Crying for >3 hours/day, >3 days/week, for >3 weeks",
+            "explanation": "Usually starts in the first few weeks of life and resolves by 3-4 months. It is a diagnosis of exclusion.",
+            "subject": "Pediatrics"
+        },
+        {
+            "id": 760,
+            "image": "C:\\Users\\anant\\.n8n-files\\flashcards\\card_3_front.png",
+            "front_image": "C:\\Users\\anant\\.n8n-files\\flashcards\\card_3_front.png",
+            "back_image": "C:\\Users\\anant\\.n8n-files\\flashcards\\card_3_back.png",
+            "question": "What are the components of 'Whipple's Triad'?",
+            "answer": "Symptoms of hypoglycemia, Low plasma glucose, and Relief of symptoms with glucose",
+            "explanation": "Classic presentation for Insulinoma (beta-cell tumor).",
+            "subject": "General Medicine"
+        },
+        {
+            "id": 582,
+            "image": "C:\\Users\\anant\\.n8n-files\\flashcards\\card_4_front.png",
+            "front_image": "C:\\Users\\anant\\.n8n-files\\flashcards\\card_4_front.png",
+            "back_image": "C:\\Users\\anant\\.n8n-files\\flashcards\\card_4_back.png",
+            "question": "A 'Garlicky' odor of the breath or stomach contents is characteristic of which poisoning?",
+            "answer": "Arsenic, Phosphorus, or Organophosphates",
+            "explanation": "In FMT exams, arsenic is the classic answer for garlicky breath. Bitter almonds = Cyanide; Rotten eggs = H2S.",
+            "subject": "Forensic Medicine"
+        },
+        {
+            "id": 472,
+            "image": "C:\\Users\\anant\\.n8n-files\\flashcards\\card_5_front.png",
+            "front_image": "C:\\Users\\anant\\.n8n-files\\flashcards\\card_5_front.png",
+            "back_image": "C:\\Users\\anant\\.n8n-files\\flashcards\\card_5_back.png",
+            "question": "What is 'Lhermitte\u2019s Sign'?",
+            "answer": "An electric shock-like sensation radiating down the spine upon neck flexion",
+            "explanation": "Classic sign of Multiple Sclerosis; indicates cervical cord irritation.",
+            "subject": "General Medicine"
+        }
+    ]
+}

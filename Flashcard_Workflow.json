@@ -1,0 +1,201 @@
+{
+    "name": "Flashcard Pipeline (Daily)",
+    "nodes": [
+        {
+            "parameters": {},
+            "id": "trigger-daily",
+            "name": "Every Day at 8am",
+            "type": "n8n-nodes-base.scheduleTrigger",
+            "typeVersion": 1,
+            "position": [
+                -200,
+                0
+            ],
+            "parameters": {
+                "rule": {
+                    "interval": [
+                        {
+                            "field": "hours",
+                            "triggerAtHour": 8
+                        }
+                    ]
+                }
+            }
+        },
+        {
+            "parameters": {
+                "command": "python \"c:\\flutter_project\\neet_pg_tools_flutter\\ads_pipeline\\flashcard_pipeline\\flashcard_generator.py\""
+            },
+            "id": "generate-content",
+            "name": "Generate Flashcards",
+            "type": "n8n-nodes-base.executeCommand",
+            "typeVersion": 1,
+            "position": [
+                20,
+                0
+            ]
+        },
+        {
+            "parameters": {
+                "fileSelector": "c:\\flutter_project\\neet_pg_tools_flutter\\ads_pipeline\\flashcard_pipeline\\output\\n8n_manifest.json"
+            },
+            "id": "read-manifest",
+            "name": "Read Manifest",
+            "type": "n8n-nodes-base.readWriteFile",
+            "typeVersion": 1,
+            "position": [
+                240,
+                0
+            ]
+        },
+        {
+            "parameters": {
+                "jsCode": "const data = JSON.parse($input.all()[0].json.data);\nreturn { json: data };"
+            },
+            "id": "parse-manifest",
+            "name": "Parse Manifest",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                460,
+                0
+            ]
+        },
+        {
+            "parameters": {
+                "chatId": "@neetpgpathscheduler",
+                "text": "={{ $json.summary_text }}",
+                "additionalFields": {
+                    "parse_mode": "Markdown",
+                    "reply_markup": {
+                        "inline_keyboard": [
+                            [
+                                {
+                                    "text": "⚡ Start Daily Quiz",
+                                    "web_app": {
+                                        "url": "https://ananthukaripot.github.io/neet_pg_tools_flutter/ads_pipeline/flashcard_pipeline/web_app/"
+                                    }
+                                }
+                            ]
+                        ]
+                    }
+                }
+            },
+            "id": "telegram-post",
+            "name": "Send Telegram Alert",
+            "type": "n8n-nodes-base.telegram",
+            "typeVersion": 1.2,
+            "position": [
+                700,
+                0
+            ],
+            "credentials": {
+                "telegramApi": {
+                    "id": "g8zkSP1fvyFp6MAt",
+                    "name": "Telegram account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "fileSelector": "c:\\flutter_project\\neet_pg_tools_flutter\\ads_pipeline\\flashcard_pipeline\\output\\daily_flashcards.json"
+            },
+            "id": "read-daily-json",
+            "name": "Read Daily JSON",
+            "type": "n8n-nodes-base.readWriteFile",
+            "typeVersion": 1,
+            "position": [
+                240,
+                220
+            ]
+        },
+        {
+            "parameters": {
+                "authentication": "oAuth2",
+                "resource": "file",
+                "operation": "createOrUpdate",
+                "owner": "AnanthuKaripot",
+                "repository": "PG-PathScheduler",
+                "filePath": "ads_pipeline/flashcard_pipeline/output/daily_flashcards.json",
+                "binaryData": true,
+                "commitMessage": "Auto-update daily flashcards"
+            },
+            "id": "github-update",
+            "name": "Update GitHub",
+            "type": "n8n-nodes-base.github",
+            "typeVersion": 1,
+            "position": [
+                460,
+                220
+            ],
+            "credentials": {
+                "githubApi": {
+                    "id": "YOUR_GITHUB_CREDENTIAL_ID",
+                    "name": "GitHub account"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "Every Day at 8am": {
+            "main": [
+                [
+                    {
+                        "node": "Generate Flashcards",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Generate Flashcards": {
+            "main": [
+                [
+                    {
+                        "node": "Read Manifest",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Read Daily JSON",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Read Manifest": {
+            "main": [
+                [
+                    {
+                        "node": "Parse Manifest",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Parse Manifest": {
+            "main": [
+                [
+                    {
+                        "node": "Telegram Post",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Read Daily JSON": {
+            "main": [
+                [
+                    {
+                        "node": "Update GitHub",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

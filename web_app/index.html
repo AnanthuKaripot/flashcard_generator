@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>PG PathScheduler Flashcards</title>
+    <!-- Telegram Web App Script -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #22d3ee;
+            --gold: #fbbf24;
+            --text: #f8fafc;
+            --success: #34d399;
+            --error: #f87171;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text);
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        #app {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* HEADER */
+        .header {
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .title {
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: 2px;
+            opacity: 0.9;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+
+        .counter-badge {
+            position: absolute;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        /* CARD CONTAINER */
+        .card-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            perspective: 1000px;
+            padding: 20px;
+        }
+
+        .flashcard {
+            width: 100%;
+            height: 100%;
+            max-width: 360px;
+            max-height: 560px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            cursor: pointer;
+        }
+
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 24px;
+            padding: 30px;
+            box-sizing: border-box;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .front {
+            background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+        }
+
+        .back {
+            background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
+            transform: rotateY(180deg);
+        }
+
+        /* CARD CONTENT */
+        .subject-badge {
+            position: absolute;
+            top: 25px;
+            background: rgba(34, 211, 238, 0.1);
+            border: 1px solid rgba(34, 211, 238, 0.3);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .question-text {
+            font-size: 1.4rem;
+            line-height: 1.4;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .tap-hint {
+            position: absolute;
+            bottom: 30px;
+            color: var(--gold);
+            opacity: 0.6;
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            font-weight: 700;
+            text-transform: uppercase;
+            animation: pulse 2s infinite;
+        }
+
+        .answer-label {
+            color: var(--success);
+            font-weight: 800;
+            margin-bottom: 15px;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .answer-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 25px;
+            color: #fff;
+        }
+
+        .explanation-container {
+            width: 100%;
+            text-align: left;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .explanation-title {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .explanation-text {
+            font-size: 0.9rem;
+            opacity: 0.85;
+            line-height: 1.5;
+            font-weight: 400;
+        }
+
+        /* CONTROLS */
+        .controls {
+            padding: 20px 30px 40px 30px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            z-index: 10;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 16px 0;
+            border-radius: 16px;
+            color: var(--text);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+            flex: 1;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn:disabled {
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #000;
+            border: none;
+        }
+
+        .btn-primary:active {
+            background: #1cbace;
+        }
+
+        /* LOADING & ERROR STATES */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-color);
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s;
+        }
+
+        .logo-text {
+            font-size: 1.2rem;
+            font-weight: 800;
+            letter-spacing: 4px;
+            color: var(--text);
+            margin-bottom: 30px;
+            opacity: 0.8;
+            text-transform: uppercase;
+        }
+
+        .loader-container {
+            position: relative;
+            width: 140px;
+            /* Slight increase for breathing room */
+            height: 140px;
+            display: flex;
+            /* Kept for fallback */
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .loader-ring {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            border: 3px solid rgba(255, 255, 255, 0.05);
+            /* Thinner for elegance */
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1.2s linear infinite;
+            /* Smoother speed */
+        }
+
+        .loader-logo {
+            position: absolute;
+            /* Force absolute centering */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            height: 60px;
+            /* Fixed height */
+            width: auto;
+            max-width: 80px;
+            /* Prevent spill */
+            z-index: 1;
+            filter: drop-shadow(0 0 15px rgba(34, 211, 238, 0.2));
+            animation: pulse-logo 2.5s ease-in-out infinite;
+        }
+
+        .loading-text {
+            font-size: 0.9rem;
+            letter-spacing: 3px;
+            font-weight: 600;
+            color: var(--accent);
+            text-transform: uppercase;
+        }
+
+        .complete-screen {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            text-align: center;
+            padding: 40px;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 0.4;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0.4;
+            }
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes pulse-logo {
+
+            0%,
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0.8;
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(1.05);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loader-container">
+            <div class="loader-ring"></div>
+            <img src="assets/logo.png" alt="PG PathScheduler" class="loader-logo">
+        </div>
+        <div class="loading-text" id="loadingText">Preparing Session...</div>
+    </div>
+
+    <!-- Main App -->
+    <div id="app">
+        <div class="header">
+            <img src="assets/logo.png" alt="Logo"
+                style="height: 32px; margin-right: 12px; filter: drop-shadow(0 0 5px rgba(0,0,0,0.5));">
+            <div class="title">Daily Flashcards</div>
+            <div id="counter" class="counter-badge">1/5</div>
+        </div>
+
+        <div class="card-container" id="cardContainer">
+            <!-- Card Injected JS -->
+        </div>
+
+        <div class="controls">
+            <button class="btn" id="prevBtn" onclick="prevCard()">Back</button>
+            <button class="btn btn-primary" id="nextBtn" onclick="nextCard()">Next</button>
+        </div>
+    </div>
+
+    <!-- Completion Screen -->
+    <div class="complete-screen" id="completeScreen">
+        <div style="font-size: 4rem; margin-bottom: 20px;">🏆</div>
+        <h1 style="color: var(--success); margin: 10px 0;">Great Job!</h1>
+        <p style="opacity: 0.7; margin-bottom: 40px;">You've completed your daily session.</p>
+        <button class="btn btn-primary" style="width: 200px; flex: none;" onclick="closeApp()">Close</button>
+    </div>
+
+    <script>
+        // DATA_INJECTION_POINT
+        let cards = [];
+        let currentIndex = 0;
+        let isFlipped = false;
+
+        // Init Telegram
+        const tg = window.Telegram.WebApp;
+        if (tg) {
+            tg.expand();
+            tg.ready();
+            // Set header color to match app
+            if (tg.setHeaderColor) tg.setHeaderColor('#0f172a');
+            if (tg.setBackgroundColor) tg.setBackgroundColor('#0f172a');
+        }
+
+        async function init() {
+            const loadingText = document.getElementById('loadingText');
+
+            try {
+                // If cards were injected by Python, use them directly
+                if (cards.length > 0) {
+                    startApp();
+                    return;
+                }
+
+                // Fetch generated JSON
+                // Use timestamp to prevent caching
+                // Relative path './' works for both local and GitHub Pages
+                const response = await fetch('./daily_flashcards.json?' + new Date().getTime());
+
+                if (!response.ok) throw new Error("Failed to load");
+
+                const data = await response.json();
+                cards = data.cards;
+
+                if (cards && cards.length > 0) {
+                    startApp();
+                } else {
+                    loadingText.textContent = "No cards available today.";
+                    loadingText.style.color = "var(--error)";
+                }
+            } catch (e) {
+                console.error(e);
+                loadingText.textContent = "Unable to load data";
+                loadingText.style.color = "var(--error)";
+
+                // Allow retry
+                const retryBtn = document.createElement('button');
+                retryBtn.textContent = "Retry";
+                retryBtn.className = "btn";
+                // Fix for stretched button: flex: none and explicit width
+                retryBtn.style.marginTop = "20px";
+                retryBtn.style.flex = "none";
+                retryBtn.style.width = "140px";
+                retryBtn.onclick = () => location.reload();
+                document.getElementById('loadingOverlay').appendChild(retryBtn);
+            }
+        }
+
+        function startApp() {
+            renderCard(currentIndex);
+            // Minimal fake delay for smooth UX transition
+            setTimeout(() => {
+                const overlay = document.getElementById('loadingOverlay');
+                overlay.style.opacity = '0';
+                setTimeout(() => overlay.remove(), 500);
+            }, 800);
+        }
+
+        function renderCard(index) {
+            isFlipped = false;
+            const card = cards[index];
+            const container = document.getElementById('cardContainer');
+
+            // Update Counters & Buttons
+            document.getElementById('counter').innerText = `${index + 1} / ${cards.length}`;
+
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+
+            prevBtn.disabled = index === 0;
+            nextBtn.innerText = (index === cards.length - 1) ? "Finish" : "Next";
+
+            // Render Card HTML
+            container.innerHTML = `
+                <div class="flashcard" id="flashcard" onclick="toggleFlip()">
+                    <div class="face front">
+                        <div class="subject-badge">${card.subject}</div>
+                        <div class="question-text">${card.question}</div>
+                        <div class="tap-hint">TAP TO FLIP</div>
+                    </div>
+                    <div class="face back">
+                        <div class="answer-label">CORRECT ANSWER</div>
+                        <div class="answer-text">${card.answer}</div>
+                        <div class="explanation-container">
+                            <div class="explanation-title">DEEP INSIGHT</div>
+                            <div class="explanation-text">${card.explanation}</div>
+                        </div>
+                        <div class="tap-hint">TAP TO FLIP BACK</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function toggleFlip() {
+            const el = document.getElementById('flashcard');
+            if (!el) return;
+
+            isFlipped = !isFlipped;
+            el.classList.toggle('flipped');
+
+            if (tg && tg.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred('light');
+            }
+        }
+
+        function nextCard() {
+            if (currentIndex < cards.length - 1) {
+                currentIndex++;
+                renderCard(currentIndex);
+                if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+            } else {
+                showComplete();
+            }
+        }
+
+        function prevCard() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderCard(currentIndex);
+                if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            }
+        }
+
+        function showComplete() {
+            document.getElementById('app').style.display = 'none';
+            document.getElementById('completeScreen').style.display = 'flex';
+            if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+        }
+
+        function closeApp() {
+            if (tg) tg.close();
+        }
+
+        // Start
+        init();
+    </script>
+</body>
+
+</html>
