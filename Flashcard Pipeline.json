@@ -1,0 +1,307 @@
+{
+  "name": "Flashcard Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "command": "python \"c:\\flutter_project\\neet_pg_tools_flutter\\flashcard_pipeline\\flashcard_generator.py\""
+      },
+      "id": "56bd50f2-7599-45af-bcd3-0b5353dd3aef",
+      "name": "Generate Flashcards",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "fileSelector": "C:\\Users\\anant\\.n8n-files\\flashcards\\n8n_manifest.json",
+        "options": {}
+      },
+      "id": "56bd6034-0cae-42ea-98ff-de350f19c495",
+      "name": "Read Manifest",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        448,
+        -208
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "@neetpgpathscheduler",
+        "text": "=⚡ *Daily PG PathScheduler Update!* \n\nToday's High-Yield Flashcards are now live.",
+        "replyMarkup": "inlineKeyboard",
+        "inlineKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "⚡ Start Daily Flashcards",
+                    "additionalFields": {
+                      "url": "https://t.me/neet_pg_pathscheduler_quizbot/flashcards"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "668e5a44-63c5-41f9-8693-ac9198ff97eb",
+      "name": "Send Telegram Alert",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        896,
+        224
+      ],
+      "webhookId": "d1d2f6d4-8a6d-4706-b03a-01c2c87512b5",
+      "credentials": {
+        "telegramApi": {
+          "id": "NnSTm6042RG8Mfag",
+          "name": "PG PathScheduler quiz bot"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "7a855473-356a-4062-a197-91731a11fc31",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "fileSelector": "C:\\Users\\anant\\.n8n-files\\flashcards\\daily_flashcards.json",
+        "options": {}
+      },
+      "id": "6f3e7e3f-6ce8-4c1c-8672-ce49bd1b5baa",
+      "name": "Read Data",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        464,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        640,
+        -208
+      ],
+      "id": "02d3d2a7-5ace-4df2-abb0-b347c20f6cc9",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data.post_images",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        832,
+        -208
+      ],
+      "id": "9b3b7d82-1707-4305-84a1-93270511e613",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "operation": "sendPhoto",
+        "chatId": "855206041",
+        "binaryData": true,
+        "binaryPropertyName": "=data",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1216,
+        -208
+      ],
+      "id": "87f070e4-3cb7-4df5-83ba-96420a45ecfe",
+      "name": "Send flashcards",
+      "webhookId": "44ca2826-a838-4a31-bb52-e51b37e58e60",
+      "credentials": {
+        "telegramApi": {
+          "id": "g8zkSP1fvyFp6MAt",
+          "name": "Pathexor bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fileSelector": "={{ $json['data.post_images'] }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1.1,
+      "position": [
+        1024,
+        -208
+      ],
+      "id": "50de9851-a910-4fda-a0e5-659e1830e287",
+      "name": "Upload pics"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "edit",
+        "owner": "AnanthuKaripot",
+        "repository": {
+          "__rl": true,
+          "value": "telegram_miniapp_manager",
+          "mode": ""
+        },
+        "filePath": "flashcards/daily_flashcards.json",
+        "binaryData": true,
+        "commitMessage": "=Daily Flashcard Update: {{ $now }}"
+      },
+      "id": "209e5d90-c1a8-4081-900e-fb36d782c128",
+      "name": "Update GitHub",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [
+        688,
+        224
+      ],
+      "webhookId": "2b28feeb-e5fe-4b5a-a8a4-44a1a5a22617",
+      "credentials": {
+        "githubApi": {
+          "id": "pGMFc5WqarUVYpIw",
+          "name": "GitHub account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Generate Flashcards": {
+      "main": [
+        [
+          {
+            "node": "Read Manifest",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Manifest": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Generate Flashcards",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Data": {
+      "main": [
+        [
+          {
+            "node": "Update GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Upload pics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send flashcards": {
+      "main": [
+        []
+      ]
+    },
+    "Upload pics": {
+      "main": [
+        [
+          {
+            "node": "Send flashcards",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update GitHub": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "b85de5d9-6bf6-4f5f-a0df-eba7fcd7b010",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "149ce4ac3837a686782c11e78d8941e3ccb6e9ca11c5625a1afbfd657c77a768"
+  },
+  "id": "6Vl9f8_aAvXe8x4VwNchL",
+  "tags": []
+}

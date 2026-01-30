@@ -336,28 +336,24 @@ def render_card_back(card):
     card_w = cx2 - cx1
     
     # --- Answer Section (Top of Card) ---
-    # Create a semi-solid green header area inside the glass card
-    overlay = Image.new('RGBA', img.size, (0,0,0,0))
-    d_ov = ImageDraw.Draw(overlay)
+    # Answer Text prep to calculate height
+    answer = clean_text(card.get('answer', 'Answer'))
+    font_ans = get_font(54, "Bold")
+    ans_lines = wrap_text(answer, font_ans, card_w - 120)
     
-    ans_h = 240
-    # Clip top radius is tricky, so draw a smaller rect or just simple rect
-    # PIL doesn't support complex clipping paths easily.
-    # We will draw a header box slightly inside with top radius.
+    # Dynamic ans_h: base height + space per line
+    line_h_ans = 65
+    label_space = 100
+    ans_h = max(260, label_space + len(ans_lines) * line_h_ans + 40)
     
     ax1, ay1 = cx1, cy1
     ax2, ay2 = cx2, cy1 + ans_h
     
-    # We can effectively draw over the top part of the glass card
-    d_ov.rounded_rectangle(
-        (ax1, ay1, ax2, ay2), 
-        radius=60,
-        corners=(True, True, False, False), # Top corners only? PIL recent versions only
-        fill=ACCENT_GREEN
-    )
+    # Create a semi-solid green header area inside the glass card
+    overlay = Image.new('RGBA', img.size, (0,0,0,0))
+    d_ov = ImageDraw.Draw(overlay)
     
-    # If `corners` param not supported (older PIL), draw full rect then clip bottom?
-    # Safer fallback: Draw standard rounded rect
+    # Draw logic for header box
     try:
          d_ov.rounded_rectangle(
             (ax1, ay1, ax2, ay2), 
@@ -373,24 +369,16 @@ def render_card_back(card):
     
     # Label
     font_lbl = get_font(20, "Bold")
-    draw.text((ax1 + 60, ay1 + 50), "CORRECT ANSWER", font=font_lbl, fill=(0, 50, 20, 180))
+    draw.text((ax1 + 60, ay1 + 45), "CORRECT ANSWER", font=font_lbl, fill=(0, 50, 20, 180))
     
-    # Answer Text
-    answer = clean_text(card.get('answer', 'Answer'))
-    font_ans = get_font(54, "Bold")
-    
-    # Wrap Answer
-    ans_lines = wrap_text(answer, font_ans, card_w - 120)
-    # Clamp to max 2 lines
-    if len(ans_lines) > 3: ans_lines = ans_lines[:3] 
-    
-    ay_text = ay1 + 90
+    # Draw Answer Text
+    ay_text = ay1 + 105 # Lowered to avoid overlap with "CORRECT ANSWER"
     for line in ans_lines:
         draw.text((ax1 + 60, ay_text), line, font=font_ans, fill=(255, 255, 255, 255))
-        ay_text += 60
+        ay_text += line_h_ans
         
     # --- Explanation Section ---
-    expl_y_start = ay2 + 50
+    expl_y_start = ay2 + 60 # Shifted down relative to dynamic ay2
     
     font_expl_lbl = get_font(24, "Bold")
     draw.text((cx1 + 60, expl_y_start), "DEEP INSIGHT:", font=font_expl_lbl, fill=ACCENT_GOLD)
